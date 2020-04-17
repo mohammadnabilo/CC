@@ -6,38 +6,65 @@ import org.javatuples.Triplet;
 
 import javafx.util.Pair;
 
-public class Container {
+public class Container{
 	private int containerId;
 	private double temperature;
 	private double pressure;
 	private double airHumidity;
 	private boolean onJourney;
 	private boolean owned;
-	private HashSet<Integer> accessClients;
-//	<journeyId,clientId>
-	private ArrayList<Triplet<Integer,Integer,HashSet<Integer>>> journeyHistory;
-	
-	
-	
-	private int clientId;
-	
+	private String content;
+	private HashSet<Client> accessClients;
+	private ArrayList<ContainerJourneyInfo> journeyHistory;
+//	Create class
+	private Client owner;
+	private Journey currentJourney;
 
 	
-
-	private int journeyId;
-	
-	public void addJourney(int journeyID) {
-		Triplet<Integer,Integer,HashSet<Integer>> triplet = new Triplet<Integer,Integer,HashSet<Integer>>(journeyID,this.clientId,accessClients);
-		journeyHistory.add(triplet);
-		this.setOnJourney(true);
-		this.setJourneyId(journeyID);
+	public Container(int containerId) {
+		super();
+		this.airHumidity = 0.5;
+		this.temperature = 20.0;
+		this.onJourney = false;
+		this.pressure = 1.0;
+		this.owned = false;
+		this.content = "";
+		this.journeyHistory = new ArrayList<ContainerJourneyInfo>();
+		this.containerId = containerId;
+		this.accessClients = new HashSet<Client>();
 	}
 	
-	public ArrayList<Triplet<Integer,Integer,HashSet<Integer>>> getJourneyHistory() {
+	
+	
+	public Client getOwner() {
+		return owner;
+	}
+
+	public void setOwner(Client owner) {
+		this.owner = owner;
+	}
+
+	public Journey getCurrentJourney() {
+		return currentJourney;
+	}
+
+	public void setCurrentJourney(Journey currentJourney) {
+		this.currentJourney = currentJourney;
+	}
+	
+	
+	public void addJourney(Journey journey) {
+		ContainerJourneyInfo containerJourneyInfo = new ContainerJourneyInfo(journey,this.owner,accessClients);
+		journeyHistory.add(containerJourneyInfo);
+		setOnJourney(true);
+		setCurrentJourney(journey);
+	}
+	
+	public ArrayList<ContainerJourneyInfo> getJourneyHistory() {
 		return journeyHistory;
 	}
 
-	public void setJourneyHistory(ArrayList<Triplet<Integer,Integer,HashSet<Integer>>> journeyHistory) {
+	public void setJourneyHistory(ArrayList<ContainerJourneyInfo> journeyHistory) {
 		this.journeyHistory = journeyHistory;
 	}
 
@@ -54,42 +81,14 @@ public class Container {
 		return result;
 	}
 	
-	public HashSet<Integer> getAccessClients() {
+	public HashSet<Client> getAccessClients() {
 		return accessClients;
 	}
 	
-	public void grantAccess (int clientID) {
-		accessClients.add(clientID);
+	public void grantAccess (Client client) {
+		accessClients.add(client);
 	}
 	
-	
-	public int getClientId() {
-		return clientId;
-	}
-
-	public void setClientId(int clientId) {
-		this.clientId = clientId;
-	}
-
-	public int getJourneyId() {
-		return journeyId;
-	}
-
-	public void setJourneyId(int journeyId) {
-		this.journeyId = journeyId;
-	}
-	
-	public Container(int containerId) {
-		super();
-		this.airHumidity = 0.5;
-		this.temperature = 20.0;
-		this.onJourney = false;
-		this.pressure = 1.0;
-		this.owned = false;
-		this.journeyHistory = new ArrayList<Triplet<Integer,Integer,HashSet<Integer>>>();
-		this.containerId = containerId;
-		this.accessClients = new HashSet<Integer>();
-	}
 	
 	public boolean isOnJourney() {
 		return onJourney;
@@ -104,7 +103,7 @@ public class Container {
 		this.owned = owned;
 	}
 
-	private String content = "";
+
 	
 	public String getContent() {
 		return content;
@@ -136,6 +135,74 @@ public class Container {
 	}
 	public void setAirHumidity(double airHumidity) {
 		this.airHumidity = airHumidity;
+	}
+	
+	public ResponseObject accessStatus(Client client) {
+		ResponseObject response = new ResponseObject();
+		Journey journey = getCurrentJourney();
+		
+		boolean accessToDataContainer = accessClients.contains(client);
+		
+		
+		if (!accessToDataContainer) {
+			response.setErrorMessage("You don't have access to this container");
+			return response;
+		} 
+		boolean journeyIsStarted = journey.isStarted();
+		if (!journeyIsStarted) {
+			response.setErrorMessage("Ship's still at harbour");
+			return response;
+		} 
+		else {
+	//		Getting the status of container
+			ArrayList<statusTrackingObject> list = journey.getStatusData();
+			statusTrackingObject status = list.get(list.size() - 1);
+			response.setStatus(status);
+			response.setErrorMessage("This is the current status of your container");
+			return response;
+		}
+
+	}
+	
+	public ResponseObject getHistoryOfContainerForClient (Client client) {
+		ResponseObject response = new ResponseObject();
+		
+		
+		ArrayList<Journey> journeyHist = fetchContainerHistory(client);
+		
+		response.setJourneyHistForClient(journeyHist);
+		response.setErrorMessage("Your container's history is succesfully retrieved");
+		return response;
+		
+	}
+
+	private ArrayList<Journey> fetchContainerHistory(Client client) {
+		ArrayList<Journey> journeyHist = new ArrayList<Journey>();
+//		Acquiring all journey data related to the client
+		for (ContainerJourneyInfo i : getJourneyHistory()) {
+			// if (p.getRight.contains(clientId))
+			if (i.getClients().contains(client)) {
+				journeyHist.add(i.getJourney());
+			}
+		}
+		return journeyHist;
+	}
+	public ResponseObject freeContainer() {
+		ResponseObject response = new ResponseObject();
+//		container is not on journey
+//		container is owned
+		boolean onJourney = isOnJourney();
+		boolean owned = isOwned();
+		if (onJourney) {
+			response.setErrorMessage("This container is on a journey");
+		}else if (!owned) {
+			response.setErrorMessage("This container does not belong to a client");
+		}else {
+			setOwner(null);
+			setOwned(false);
+			response.setErrorMessage("Container was successfully freed");
+		}
+		return response;
 	}
 	
 	public void print() {
