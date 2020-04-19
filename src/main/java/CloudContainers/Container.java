@@ -19,9 +19,11 @@ public class Container{
 //	Create class
 	private Client owner;
 	private Journey currentJourney;
+	private Validator validator;
+	private LogisticCompany company;
 
 	
-	public Container(int containerId) {
+	public Container(int containerId, LogisticCompany company) {
 		super();
 		this.airHumidity = 0.5;
 		this.temperature = 20.0;
@@ -32,6 +34,9 @@ public class Container{
 		this.journeyHistory = new ArrayList<ContainerJourneyInfo>();
 		this.containerId = containerId;
 		this.accessClients = new HashSet<Client>();
+		this.company = company;
+		this.validator = new Validator(company);
+		
 	}
 	
 	
@@ -85,8 +90,21 @@ public class Container{
 		return accessClients;
 	}
 	
-	public void grantAccess (Client client) {
-		accessClients.add(client);
+	public ResponseObject grantAccess (Client client) {
+		
+		ResponseObject response = new ResponseObject();
+
+		boolean sameCompany = client.getCompany().equals(this.getOwner().getCompany());
+		
+		if (sameCompany) {
+			accessClients.add(client);
+			response.setErrorMessage("Access succesfully granted");
+			return response;
+		}
+		
+		response.setErrorMessage("You do not share company");
+		
+		return response;
 	}
 	
 	
@@ -167,11 +185,19 @@ public class Container{
 	public ResponseObject getHistoryOfContainerForClient (Client client) {
 		ResponseObject response = new ResponseObject();
 		
+		boolean clientHasAccess = validator.clientHasAccess(client, this);
 		
-		ArrayList<Journey> journeyHist = fetchContainerHistory(client);
-		
-		response.setJourneyHistForClient(journeyHist);
-		response.setErrorMessage("Your container's history is succesfully retrieved");
+		if (clientHasAccess) {
+			ArrayList<Journey> journeyHist = fetchContainerHistory(client);
+			
+			response.setJourneyHistForClient(journeyHist);
+			response.setErrorMessage("Your container's history is succesfully retrieved");
+
+		}
+		else {
+			response.setErrorMessage("You do not have access to this container");
+
+		}
 		return response;
 		
 	}

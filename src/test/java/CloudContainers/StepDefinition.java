@@ -588,7 +588,7 @@ public class StepDefinition{
 	
 	@Given("an non-registered container")
 	public void an_non_registered_container() {
-	    container = new Container(0);
+	    container = new Container(0,null);
 	}
 	
 	@When("container history is requested by client")
@@ -610,6 +610,51 @@ public class StepDefinition{
 	@Then("an array containing relevant journeys are returned with size {int}")
 	public void an_array_containing_relevant_journeys_are_returned_with_size(Integer int1) {
 	    assertTrue(response.getJourneyHist().size() == int1);
+	}
+	
+	@Then("error message shown saying that client does not have access")
+	public void error_message_shown_saying_that_client_does_not_have_access() {
+	    assertEquals(response.getErrorMessage(), "You do not have access to this container");
+	}
+
+	
+	//__________________________________________grantAccessToData______________________________________________________________
+	
+	ResponseObject response1;
+	ResponseObject response2;
+	
+	@Given("the container is put on the journey containing {string}")
+	public void the_container_is_put_on_the_journey_containing(String string) {
+		client2.containerToJourney(container, journey, string);
+	}
+
+	@When("client with container grants other client access to data of container")
+	public void client_with_container_grants_other_client_access_to_data_of_container() {
+	    response1 = container.grantAccess(client1);
+	    
+	}
+
+	@When("other client tries to get history")
+	public void other_client_tries_to_get_history() {
+	    response = container.getHistoryOfContainerForClient(client1);
+	}
+	
+	@Then("access successfully granted")
+	public void access_successfully_granted() {
+		assertEquals(response1.getErrorMessage(),"Access succesfully granted");
+	}
+	
+	LogisticCompany lc2;
+	@Given("a client from another company")
+	public void a_client_from_another_company() {
+		lc2  = new LogisticCompany("Hellmann",2,50);
+		client1 = new Client("Karsten","smallmoney123@gmail.com","24-05-1998","male",10101010,"1234");
+		lc2.newClient(client1);
+	}
+	
+	@Then("error message displayed saying that they are not in same company")
+	public void error_message_displayed_saying_that_they_are_not_in_same_company() {
+	    assertEquals(response1.getErrorMessage(),"You do not share company");
 	}
 
 	

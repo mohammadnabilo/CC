@@ -50,6 +50,14 @@ Feature: A container has a history log of its journeys, clients and status data
 		When container history is requested by client
 		Then an array containing relevant journeys are returned with size 0
 		And response message saying that history of container was successfully retrieved to client
+		
+  @tag4
+  Scenario: client wants to see history of container that they do not have access to
+  	Given A logistic company
+    And existing client
+    And an unowned container
+		When container history is requested by client
+		Then error message shown saying that client does not have access
 
 
   #@tag2

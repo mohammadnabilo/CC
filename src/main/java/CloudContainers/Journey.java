@@ -173,7 +173,7 @@ public class Journey {
 //			Changing status data for containers registered to this journey
 			for (Container container : company.getContainersForJourney(this)) {
 			
-					oneContainerOnJourney = oneContainerOnJourney || true;
+					oneContainerOnJourney = true;
 					newTemp = container.getTemperature() + randTempIncrement;
 					container.setTemperature(newTemp);
 					newPressure = container.getPressure() + randPressureIncrement;

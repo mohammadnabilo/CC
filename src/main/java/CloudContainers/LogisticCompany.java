@@ -1,21 +1,6 @@
 package CloudContainers;
-import java.nio.file.Paths;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import org.apache.commons.validator.GenericValidator;
-import org.javatuples.Triplet;
-
-import javafx.util.Pair;
 
 public class LogisticCompany {
 	private String name;
@@ -38,7 +23,7 @@ public class LogisticCompany {
 		
 		// Generate existing containers
 		for (int i=1; i<=amountOfContainers;i++) {
-			containers.add(new Container(i));
+			containers.add(new Container(i,this));
 		}
 		
 	}
@@ -64,7 +49,7 @@ public class LogisticCompany {
 	
 	public void addContainer() {
 		amountOfContainers++;
-		containers.add(new Container(amountOfContainers));
+		containers.add(new Container(amountOfContainers,this));
 	}
 	
 	
@@ -86,6 +71,21 @@ public class LogisticCompany {
 	}
 
 
+	public boolean equals(LogisticCompany company) {
+		if (company instanceof LogisticCompany) {
+			return this.getCompanyID() == company.getCompanyID();
+		}
+		return false;	
+	}
+	
+	public int hashCode() {
+		int result = 17;
+		result = 31 * result + this.getCompanyID();
+		return result;
+	}
+	
+	
+	
 	
 	public boolean ownedContainer(Client client, Container container) {
 		return (container.getOwner()).equals(client);
@@ -141,7 +141,6 @@ public class LogisticCompany {
 		response.setJourneys(container.getJourneyHistory());
 		response.setErrorMessage("History successfully retrieved");
 		return response;
-		
 	}
 
 	public boolean clientExists(String email) {

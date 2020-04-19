@@ -23,11 +23,11 @@ public class Validator {
 		this.company = company;
 	}
 
-	public boolean validBirthdate(String birthdate) {
+	public static boolean validBirthdate(String birthdate) {
 		return GenericValidator.isDate(birthdate, "dd-MM-yyyy", true);
 	}
 	
-	public boolean validEmail(String email) {
+	public static boolean validEmail(String email) {
 		   boolean result = true;
 		   try {
 		      InternetAddress emailAddr = new InternetAddress(email);
@@ -39,7 +39,7 @@ public class Validator {
 		}
 	
 	
-	public boolean validParameters(String name, String email, String birthdate, String gender, int number) {
+	public static boolean emptyParameters(String name, String email, String birthdate, String gender, int number) {
 		return !(   (name.equals("")) 
 				|| (birthdate.equals("")) 
 				|| (email.equals(""))			
@@ -55,7 +55,7 @@ public class Validator {
 	public ResponseObject validInput(String name, String email, String birthdate, String gender, int number) {
 	ResponseObject response = new ResponseObject();
 	
-		if (!validParameters(name,email,birthdate,gender,number)) {
+		if (!emptyParameters(name,email,birthdate,gender,number)) {
 			response = new ResponseObject("There is a missing parameter");
 			return response;
 		}
@@ -82,5 +82,8 @@ public class Validator {
 		return response;
 	
 }
+	public boolean clientHasAccess(Client client, Container container) {
+		return container.getAccessClients().stream().anyMatch(c -> c.equals(client));
+	}
 	
 }
