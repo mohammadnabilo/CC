@@ -235,7 +235,7 @@ public class StepDefinition{
 	@Given("an unowned container")
 	public void an_unowned_container() {
 		container = lc.getContainerDatabase().findFreeContainer();
-		assertTrue(!container.isOwned() && container.getContainerId() != 0);
+		assertTrue(!container.isOwned() && container.getContainerID() != 0);
 		
 	}
 	

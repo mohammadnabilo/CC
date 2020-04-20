@@ -7,7 +7,7 @@ import org.javatuples.Triplet;
 import javafx.util.Pair;
 
 public class Container{
-	private int containerId;
+	private int containerID;
 	private double temperature;
 	private double pressure;
 	private double airHumidity;
@@ -16,14 +16,18 @@ public class Container{
 	private String content;
 	private HashSet<Client> accessClients;
 	private ArrayList<ContainerJourneyInfo> journeyHistory;
-//	Create class
 	private Client owner;
 	private Journey currentJourney;
 	private Validator validator;
 	private LogisticCompany company;
-
 	
-	public Container(int containerId, LogisticCompany company) {
+	/**Creates a container
+	 * 
+	 * @param containerId
+	 * @param company
+	 */
+	
+	public Container(int containerID, LogisticCompany company) {
 		super();
 		this.airHumidity = 0.5;
 		this.temperature = 20.0;
@@ -32,31 +36,53 @@ public class Container{
 		this.owned = false;
 		this.content = "";
 		this.journeyHistory = new ArrayList<ContainerJourneyInfo>();
-		this.containerId = containerId;
+		this.containerID = containerID;
 		this.accessClients = new HashSet<Client>();
 		this.company = company;
 		this.validator = new Validator(company);
 		
 	}
 	
-	
+	/**Gets owner of container
+	 * 
+	 * @return client
+	 */
 	
 	public Client getOwner() {
 		return owner;
 	}
+	
+	/**Sets owner of container
+	 * 
+	 * @param owner
+	 */
 
 	public void setOwner(Client owner) {
 		this.owner = owner;
 	}
+	
+	/**Gets current journey of container
+	 * 
+	 * @return Journey
+	 */
 
 	public Journey getCurrentJourney() {
 		return currentJourney;
 	}
+	
+	/**Sets current journey of container
+	 * 
+	 * @param currentJourney
+	 */
 
 	public void setCurrentJourney(Journey currentJourney) {
 		this.currentJourney = currentJourney;
 	}
 	
+	/**Adds journey to journey history
+	 * 
+	 * @param journey
+	 */
 	
 	public void addJourney(Journey journey) {
 		ContainerJourneyInfo containerJourneyInfo = new ContainerJourneyInfo(journey,this.owner,accessClients);
@@ -65,30 +91,189 @@ public class Container{
 		setCurrentJourney(journey);
 	}
 	
+	/**Gets journey history of container
+	 * 
+	 * @return journeyHistory
+	 */
+	
 	public ArrayList<ContainerJourneyInfo> getJourneyHistory() {
 		return journeyHistory;
 	}
+	
+	/**Sets journey history of container
+	 * 
+	 * @param journeyHistory
+	 */
 
 	public void setJourneyHistory(ArrayList<ContainerJourneyInfo> journeyHistory) {
 		this.journeyHistory = journeyHistory;
 	}
+	
+	/**Checks if container is on journey
+	 * 
+	 * @return boolean
+	 */
 
-	public boolean equals(Container container) {
-		if (container instanceof Container) {
-			return this.getContainerId() == container.getContainerId();
-		}
-		return false;	
+	public boolean isOnJourney() {
+		return onJourney;
 	}
 	
-	public int hashCode() {
-		int result = 17;
-		result = 31 * result + this.containerId;
-		return result;
+	/**Sets container on journey
+	 * 
+	 * @param onJourney a boolean describing if container is on journey
+	 */
+	
+	public void setOnJourney(boolean onJourney) {
+		this.onJourney = onJourney;
 	}
+	
+	/**Checks if container is owned
+	 * 
+	 * @return owned boolean value
+	 */
+	
+	public boolean isOwned() {
+		return owned;
+	}
+	
+	/**Sets owned truth value of container
+	 * 
+	 * @param owned
+	 */
+	
+	public void setOwned(boolean owned) {
+		this.owned = owned;
+	}
+	
+	/** Gets content of container
+	 * 
+	 * @return content
+	 */
+	
+	public String getContent() {
+		return content;
+	}
+	
+	/**Sets content of container
+	 * 
+	 * @param content
+	 */
+	
+	public void setContent(String content) {
+		this.content = content;
+	}
+	
+	/**Gets containerID
+	 * 
+	 * @return containerID
+	 */
+	
+	public int getContainerID() {
+		return containerID;
+	}
+	
+	/**Sets containerID of container
+	 * 
+	 * @param containerID
+	 */
+
+	public void setContainerId(int containerID) {
+		this.containerID = containerID;
+	}
+	
+	/**Gets temperature inside container in Celsius
+	 * 
+	 * @return temperature
+	 */
+	
+	public double getTemperature() {
+		return temperature;
+	}
+	
+	/**Sets temperature of container
+	 * 
+	 * @param temperature
+	 */
+	
+	public void setTemperature(double temperature) {
+		this.temperature = temperature;
+	}
+	
+	/**Gets pressure inside container in atmosphere
+	 * 
+	 * @return pressure
+	 */
+	
+	public double getPressure() {
+		return pressure;
+	}
+	
+	/**Sets pressure inside container
+	 * 
+	 * @param pressure
+	 */
+	
+	public void setPressure(double pressure) {
+		this.pressure = pressure;
+	}
+	
+	/**Gets air humidity inside container in percent
+	 * 
+	 * @return airHumidity
+	 */
+	
+	public double getAirHumidity() {
+		return airHumidity;
+	}
+	
+	/**Sets air humidity inside container
+	 * 
+	 * @param airHumidity
+	 */
+	
+	public void setAirHumidity(double airHumidity) {
+		this.airHumidity = airHumidity;
+	}
+	
+	/**Gets a hashset of clients that has access to containers data
+	 * 
+	 * @return accessClients
+	 */
 	
 	public HashSet<Client> getAccessClients() {
 		return accessClients;
 	}
+	
+	/**Compares container with another container using containerID
+	 * 
+	 * @param client
+	 * @return boolean
+	 */
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Container) {
+			return this.getContainerID() == ((Container) o).getContainerID();
+		}
+		return false;	
+	}
+	
+	/** HashCode implementation for checking equality of container objects
+	 * 
+	 */
+	
+	@Override
+	public int hashCode() {
+		int result = 17;
+		result = 31 * result + this.containerID;
+		return result;
+	}
+	
+	/**Grants access to the containers data to a new client
+	 * 
+	 * @param client
+	 * @return response
+	 */
 	
 	public ResponseObject grantAccess (Client client) {
 		
@@ -107,60 +292,17 @@ public class Container{
 		return response;
 	}
 	
-	
-	public boolean isOnJourney() {
-		return onJourney;
-	}
-	public void setOnJourney(boolean onJourney) {
-		this.onJourney = onJourney;
-	}
-	public boolean isOwned() {
-		return owned;
-	}
-	public void setOwned(boolean owned) {
-		this.owned = owned;
-	}
-
-
-	
-	public String getContent() {
-		return content;
-	}
-	public void setContent(String content) {
-		this.content = content;
-	}
-	public int getContainerId() {
-		return containerId;
-	}
-
-	public void setContainerId(int containerId) {
-		this.containerId = containerId;
-	}
-	public double getTemperature() {
-		return temperature;
-	}
-	public void setTemperature(double temperature) {
-		this.temperature = temperature;
-	}
-	public double getPressure() {
-		return pressure;
-	}
-	public void setPressure(double pressure) {
-		this.pressure = pressure;
-	}
-	public double getAirHumidity() {
-		return airHumidity;
-	}
-	public void setAirHumidity(double airHumidity) {
-		this.airHumidity = airHumidity;
-	}
+	/**Accesses status of container
+	 * 
+	 * @param client
+	 * @return response containing a message and a status
+	 */
 	
 	public ResponseObject accessStatus(Client client) {
 		ResponseObject response = new ResponseObject();
 		Journey journey = getCurrentJourney();
 		
 		boolean accessToDataContainer = accessClients.contains(client);
-		
 		
 		if (!accessToDataContainer) {
 			response.setErrorMessage("You don't have access to this container");
@@ -182,6 +324,12 @@ public class Container{
 
 	}
 	
+	/**Gets full history of a container, where it has been owned by a specific client
+	 * 
+	 * @param client
+	 * @return response containing a message and history of container
+	 */
+	
 	public ResponseObject getHistoryOfContainerForClient (Client client) {
 		ResponseObject response = new ResponseObject();
 		
@@ -201,6 +349,12 @@ public class Container{
 		return response;
 		
 	}
+	
+	/**Adds all journeys that container has been on with this client to history
+	 * 
+	 * @param client
+	 * @return journeyHist
+	 */
 
 	private ArrayList<Journey> fetchContainerHistory(Client client) {
 		ArrayList<Journey> journeyHist = new ArrayList<Journey>();
@@ -213,6 +367,12 @@ public class Container{
 		}
 		return journeyHist;
 	}
+	
+	/**Frees a container from client
+	 * 
+	 * @return response containing an error message
+	 */
+	
 	public ResponseObject freeContainer() {
 		ResponseObject response = new ResponseObject();
 //		container is not on journey
@@ -231,8 +391,12 @@ public class Container{
 		return response;
 	}
 	
+	/**Prints information of container
+	 * 
+	 */
+	
 	public void print() {
-		System.out.println(this.getContainerId());
+		System.out.println(this.getContainerID());
 		System.out.println(this.getTemperature());
 		System.out.println(this.getPressure());
 		System.out.println(this.getAirHumidity());

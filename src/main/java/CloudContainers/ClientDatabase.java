@@ -1,12 +1,21 @@
 package CloudContainers;
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
+
+/** Represents a hashset of clients
+ * @author Gustav
+ * @author Victor
+ *
+ */
 
 public class ClientDatabase extends HashSet<Client> {
 		
-		
+		/** Gets a client given a unique clientID
+		 * 
+		 * @param clientID
+		 * @return client
+		 */
+	
 		public Client getClient(int clientID) {
 			for (Client c :this) {
 				if (c.getClientID() == clientID) {
@@ -14,6 +23,12 @@ public class ClientDatabase extends HashSet<Client> {
 				}
 			} return null;
 		}
+		
+		/** Gets client given a unique email
+		 * 
+		 * @param email
+		 * @return client
+		 */
 		
 		public Client getClient(String email) {
 			
@@ -23,6 +38,13 @@ public class ClientDatabase extends HashSet<Client> {
 				}
 			} return null;
 		}	
+		
+		/** Gets client given a phone number
+		 * 
+		 * @param number
+		 * @return client
+		 */
+		
 		public Client getClientN(int number) {
 			
 			for (Client c :this) {
