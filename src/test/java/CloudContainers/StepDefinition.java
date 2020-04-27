@@ -3,12 +3,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Set;
 
-import CloudContainers.Client;
-import CloudContainers.ClientDatabase;
+import Cloud.model.Client;
+import Cloud.model.Container;
+import Cloud.model.DataPoint;
+import Cloud.model.Journey;
+import Cloud.model.JourneyDataGenerator;
+import Cloud.model.LogisticCompany;
+import Cloud.model.ResponseObject;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -288,7 +292,7 @@ public class StepDefinition{
 	@Given("a valid journey")
 	public void a_valid_journey() {
 	    journey = new Journey("Texas", "Zimbabwe",50);
-	    lc.addJourney(journey);
+	    lc.registerJourney(journey);
 	}
 
 	@When("logistic company tries to put container on journey")
@@ -316,7 +320,7 @@ public class StepDefinition{
 	@Given("a registered journey with PoO of {string}")
 	public void a_registered_journey_with_PoO_of(String string) {
 		journey = new Journey(string, "Zimbabwe",50);
-	    lc.addJourney(journey);
+	    lc.registerJourney(journey);
 	}
 
 	@When("the logistic company tries to update port of origin to {string}")
@@ -332,7 +336,7 @@ public class StepDefinition{
 	@Given("a registered journey with destination of {string}")
 	public void a_registered_journey_with_destination_of(String string) {
 	    journey = new Journey("Bahamas", string,50);
-	    lc.addJourney(journey);
+	    lc.registerJourney(journey);
 	}
 
 	@When("the logistic company tries to update destination to {string}")
@@ -356,9 +360,9 @@ public class StepDefinition{
 		journey1 = new Journey(string, "Copenhagen",50);
 		journey2 = new Journey(string2, "Copenhagen",50);
 		journey3 = new Journey(string3, "Copenhagen",50);
-	    lc.addJourney(journey1);
-	    lc.addJourney(journey2);
-	    lc.addJourney(journey3);
+	    lc.registerJourney(journey1);
+	    lc.registerJourney(journey2);
+	    lc.registerJourney(journey3);
 	}
 
 	@When("journeys are filtered for {string}")
@@ -379,9 +383,9 @@ public class StepDefinition{
 		journey1 = new Journey("Copenhagen",string,50);
 		journey2 = new Journey("Copenhagen",string2,50);
 		journey3 = new Journey("Copenhagen",string3,50);
-	    lc.addJourney(journey1);
-	    lc.addJourney(journey2);
-	    lc.addJourney(journey3);
+	    lc.registerJourney(journey1);
+	    lc.registerJourney(journey2);
+	    lc.registerJourney(journey3);
 	}
 	
 	@When("journeys are filtered for destination {string}")
@@ -402,12 +406,6 @@ public class StepDefinition{
 	}
 	
 	// ______________________________endJourney____________________________________________________
-	
-	@Given("a registered journey from {string} to {string}")
-	public void a_registered_journey_from_to(String string, String string2) {
-		journey = new Journey(string, string2,50);
-	    lc.addJourney(journey);
-	}
 
 
 	@When("logistic company tries to end journey")
@@ -431,7 +429,7 @@ public class StepDefinition{
 
 	@When("logistic company frees one container")
 	public void logistic_company_frees_one_container() {
-	    response = container.freeContainer();
+	    response = lc.freeContainer(container);
 	    
 	}
 
@@ -457,7 +455,7 @@ public class StepDefinition{
 	@Given("a journey from {string} to {string} with {int} hours to destination")
 	public void a_journey_from_to_with_hours_to_destination(String string, String string2, Integer int1) {
 		journey = new Journey(string, string2,int1);
-	    lc.addJourney(journey);
+	    lc.registerJourney(journey);
 	}
 
 	@Given("three containers registered to the client")
@@ -479,7 +477,7 @@ public class StepDefinition{
 	
 	@When("journey is started and run for {int} hours")
 	public void journey_is_started_and_run_for_hours(Integer int1) {
-	    response = journey.progressJourney(int1);
+	    response = JourneyDataGenerator.progressJourney(journey,int1);
 	}
 	
 	@Then("journey elapsed time is updated to {int} hours")
@@ -490,13 +488,13 @@ public class StepDefinition{
 
 	@Then("data has been collected up till {int} hours")
 	public void data_has_been_collected_up_till_hours(Integer int1) {
-		ArrayList<statusTrackingObject> list;
+		ArrayList<DataPoint> list;
 		list = journey.getStatusData();
 		assertTrue(list.get(list.size()-1).getTime() == int1);
 	}
 
-	@Then("a succes response is given for journey {int} elapsed time {int}")
-	public void a_succes_response_is_given_for_journey_elapsed_time(Integer int1, Integer int2) {
+	@Then("a succes response is given for journey with id {int} and elapsed time {int}")
+	public void a_succes_response_is_given_for_journey_with_id_and_elapsed_time(Integer int1, Integer int2) {
 	    assertEquals(response.getErrorMessage(),"Your container on journey " + int1 + " has traveled " + int2 + " hours.");
 	}
 	
@@ -507,7 +505,7 @@ public class StepDefinition{
 	
 	@Then("no data has been collected")
 	public void no_data_has_been_collected() {
-		ArrayList<statusTrackingObject> list;
+		ArrayList<DataPoint> list;
 		list = journey.getStatusData();
 		assertTrue(list.size() == 0);
 	}
@@ -516,6 +514,143 @@ public class StepDefinition{
 	public void a_response_is_returned_that_the_journey_has_no_containers() {
 		assertEquals(response.getErrorMessage(),"No containers are on this journey");
 	}
+	
+	
+	
+	@Then("a response is given for travel time too low")
+	public void a_response_is_given_for_travel_time_too_low() {
+	    assertEquals(response.getErrorMessage(), "Travel time has to be a more than 0");
+	}
+	
+	// ____________________________accessData______________________________________________________
+	
+	@When("client request the data for his container")
+	public void client_request_the_data_for_his_container() {
+	    response = container1.accessStatus(client1);
+	}
+	@When("client request the data for a container he does not own")
+	public void client_request_the_data_for_a_container_he_does_not_own() {
+	    response = container.accessStatus(client1);
+	}
+
+	@Then("the status of the container is returned")
+	public void the_status_of_the_container_is_returned() {
+	    assertTrue(response.getStatus().getTime() != 0);
+	}
+
+	@Then("a succes for data access is displayed")
+	public void a_succes_for_data_access_is_displayed() {
+	    assertEquals(response.getErrorMessage(),"This is the current status of your container");
+	}
+
+	@Then("a error message is returned for data access")
+	public void a_error_message_is_returned_for_data_access() {
+	    assertEquals(response.getErrorMessage(),"You don't have access to this container");
+	}
+	@Then("a error message is returned for journey has not started")
+	public void a_error_message_is_returned_for_journey_has_not_started() {
+	    assertEquals(response.getErrorMessage(),"Ship's still at harbour");
+	}
+
+	// ________________________________________containerHistory_____________________________________________________________
+	
+
+	@Given("the container has been on one journey from {string} to {string} and another journey from {string} to {string}")
+	public void the_container_has_been_on_one_journey_from_to_and_another_journey_from_to(String string, String string2, String string3, String string4) {
+		journey1 = new Journey(string, string2,10);
+	    lc.registerJourney(journey1);
+	    client1.containerToJourney(container, journey1, "Chocolate");
+		JourneyDataGenerator.progressJourney(journey1,10);
+		
+		journey2 = new Journey(string3, string4,20);
+	    lc.registerJourney(journey2);
+	    client1.containerToJourney(container, journey2, "Banana");
+	    JourneyDataGenerator.progressJourney(journey2,20);
+		
+	}
+
+	@When("container history is requested by logistic company")
+	public void container_history_is_requested_by_logistic_company() {
+	    response = lc.getFullHistory(container);
+	}
+
+	@Then("an array containing container journey information is returned")
+	public void an_array_containing_container_journey_information_is_returned() {
+	    assertEquals(response.getJourneys().size(), 2);
+	}
+
+	@Then("response message saying that history of container was successfully retrieved")
+	public void response_message_saying_that_history_of_container_was_successfully_retrieved() {
+	    assertEquals(response.getErrorMessage(),"History successfully retrieved");
+	}
+	
+	
+	@When("container history is requested by client")
+	public void container_history_is_requested_by_client() {
+	    response = container.getHistoryOfContainerForClient(client1);
+	}
+
+	@Then("an array containing relevant journeys are returned")
+	public void an_array_containing_relevant_journeys_are_returned() {
+	    assertEquals(response.getJourneyHist().size(),2);
+	}
+
+	@Then("response message saying that history of container was successfully retrieved to client")
+	public void response_message_saying_that_history_of_container_was_successfully_retrieved_to_client() {
+	    assertEquals(response.getErrorMessage(),"Your container's history is succesfully retrieved");
+	}
+
+	
+	@Then("an array containing relevant journeys are returned with size {int}")
+	public void an_array_containing_relevant_journeys_are_returned_with_size(Integer int1) {
+	    assertTrue(response.getJourneyHist().size() == int1);
+	}
+	
+	@Then("error message shown saying that client does not have access")
+	public void error_message_shown_saying_that_client_does_not_have_access() {
+	    assertEquals(response.getErrorMessage(), "You do not have access to this container");
+	}
+
+	
+	//__________________________________________grantAccessToData______________________________________________________________
+	
+	ResponseObject response1;
+	ResponseObject response2;
+	
+	@Given("the container is put on the journey containing {string}")
+	public void the_container_is_put_on_the_journey_containing(String string) {
+		client2.containerToJourney(container, journey, string);
+	}
+
+	@When("client with container grants other client access to data of container")
+	public void client_with_container_grants_other_client_access_to_data_of_container() {
+	    response1 = container.grantAccess(client1);
+	    
+	}
+
+	@When("other client tries to get history")
+	public void other_client_tries_to_get_history() {
+	    response = container.getHistoryOfContainerForClient(client1);
+	}
+	
+	@Then("access successfully granted")
+	public void access_successfully_granted() {
+		assertEquals(response1.getErrorMessage(),"Access succesfully granted");
+	}
+	
+	LogisticCompany lc2;
+	@Given("a client from another company")
+	public void a_client_from_another_company() {
+		lc2  = new LogisticCompany("Hellmann",2,50);
+		client1 = new Client("Karsten","smallmoney123@gmail.com","24-05-1998","male",10101010,"1234");
+		lc2.newClient(client1);
+	}
+	
+	@Then("error message displayed saying that they are not in same company")
+	public void error_message_displayed_saying_that_they_are_not_in_same_company() {
+	    assertEquals(response1.getErrorMessage(),"You do not share company");
+	}
+
 	
 	
 	
