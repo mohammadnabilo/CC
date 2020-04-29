@@ -27,7 +27,7 @@ public class StepDefinition{
 	
 	@Given("A logistic company")
 	public void a_logistic_company() {
-	    lc  = new LogisticCompany("Maersk",1,100,"bigstonks");
+	    lc  = new LogisticCompany("Maersk",1,100);
 	}
 	
 	@Given("A none existing client")
@@ -61,6 +61,11 @@ public class StepDefinition{
 		response = lc.newClient(client1);
 	}
 
+	@Then("error message is thrown")
+	public void error_message_is_thrown() {
+		assertEquals(response.getErrorMessage(),"Existing client");
+		
+	}
 	
 	@Given("A none existing client with missing information")
 	public void a_none_existing_client_with_missing_information(){
@@ -131,7 +136,7 @@ public class StepDefinition{
 
 	@Then("Display phonenumber update success message")
 	public void display_phonenumber_update_success_message() {
-		assertEquals(response.getErrorMessage(),"Valid Phone number");
+		assertEquals(response.getErrorMessage(),"Phone number has been updated");
 		
 	}
 	
@@ -636,7 +641,7 @@ public class StepDefinition{
 	LogisticCompany lc2;
 	@Given("a client from another company")
 	public void a_client_from_another_company() {
-		lc2  = new LogisticCompany("Hellmann",2,50,"hellmans");
+		lc2  = new LogisticCompany("Hellmann",2,50);
 		client1 = new Client("Karsten","smallmoney123@gmail.com","24-05-1998","male",10101010,"1234");
 		lc2.newClient(client1);
 	}

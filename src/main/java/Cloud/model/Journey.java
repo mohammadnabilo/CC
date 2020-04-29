@@ -2,9 +2,6 @@ package Cloud.model;
 
 import java.util.ArrayList;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 
 
 /** Class to respresent a journey
@@ -17,9 +14,7 @@ public class Journey {
 	private int journeyID;
 	private String portOfOrigin;
 	private String destination;
-	
-	private ContainerDatabase containerDB;
-	
+	private LogisticCompany company;
 	private boolean isStarted;
 	private int timeToDestination;
 	private int elapsedTime;
@@ -48,12 +43,12 @@ public class Journey {
 		this.journeyID = journeyID;
 	}
 
-	/** This method sets the container database
+	/** This method sets the company that the journey belongs to
 	 * 
-	 * @param containerDB
+	 * @param company
 	 */
-	public void setContainerDB(ContainerDatabase containerDB) {
-		this.containerDB = containerDB;
+	public void setCompany(LogisticCompany company) {
+		this.company = company;
 	}
 	
 	/** This method gets the amount of hours that journey has been underway for
@@ -132,12 +127,12 @@ public class Journey {
 		this.isStarted = isStarted;
 	}
 	
-	/** This method gets the container database
+	/** This method gets the company that has this journey
 	 * 
-	 * @return containerDB - type ContainerDatabase
+	 * @return company - type LogisticCompany
 	 */
-	public ContainerDatabase getContainerDB() {
-		return containerDB;
+	public LogisticCompany getCompany() {
+		return company;
 	}
 	
 	/** This method fetches the ID of this journey
@@ -231,7 +226,7 @@ public class Journey {
 	 */
 	private int freeUpContainers(int countFree) {
 //		The filter returns null
-		for (Container container : containerDB.getContainersForJourney(this)) {
+		for (Container container : company.getContainersForJourney(this)) {
 				container.setCurrentJourney(null);
 				container.setOnJourney(false);
 				container.setContent("");

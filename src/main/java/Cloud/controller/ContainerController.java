@@ -3,6 +3,7 @@ package Cloud.controller;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.Optional;
 
 import javax.servlet.RequestDispatcher;
@@ -81,9 +82,20 @@ public class ContainerController extends HttpServlet {
 	    if (company.getPassword().equals(pass) && company.getName().equals(name)) {
 	    	RequestDispatcher rd=request.getRequestDispatcher("/WelcomeC.html"); 
 			model.addAttribute("company",company);
+			model.addAttribute("clientContainers",company.getContainerDatabase());
+
 			return "WelcomeC";
+			
+			
 	    }    
 	return "CompanyLogin";}
+	
+	@GetMapping("/WelcomeC")
+	public String WelcomeCompany(Model model) throws IOException {
+
+	    return "WelcomeC";
+
+	}
 		
 	@GetMapping("/Welcome" )
 	public String welcome(ModelMap model, @ModelAttribute("client") Client client) {
@@ -97,6 +109,7 @@ public class ContainerController extends HttpServlet {
 			return "ContainerPage";
 			
 		}
+		
 		@GetMapping("/UpdateInfo")
 		public String updateinfo(ModelMap model) throws FileNotFoundException {
 			Client client = JSONWriter.getIn();
@@ -104,7 +117,6 @@ public class ContainerController extends HttpServlet {
 			return "ClientUpdate";
 			
 		}
-
 		@PostMapping("/UpdateInfo")
 		public String updateinfo(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
 			

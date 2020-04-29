@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import Cloud.model.ContainerJourneyInfo;
 import Cloud.model.Client;
@@ -18,25 +17,26 @@ import Cloud.model.Container;
 import Cloud.model.Journey;
 import Cloud.model.LogisticCompany;
 import Cloud.model.ResponseObject;
-
+import Cloud.model.Validator;
 
 
 public class Container{
-
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO) 
+	@Column
 	private int containerID;
 	private double temperature;
 	private double pressure;
 	private double airHumidity;
 	private boolean onJourney;
-
+	@NotBlank
+	@Column
 	private String content;
-
 	private HashSet<Client> accessClients;
 	private ArrayList<ContainerJourneyInfo> journeyHistory;
 	private Client owner;
 	private Journey currentJourney;
-	
-
+	private Validator validator;
 	/**Creates a container
 	 * 
 	 * @param containerId
@@ -45,7 +45,7 @@ public class Container{
 	
 	public Container() {
 	}
-	public Container(int containerID) {
+	public Container(int containerID, LogisticCompany company) {
 		super();
 		this.airHumidity = 0.5;
 		this.temperature = 20.0;
@@ -55,6 +55,7 @@ public class Container{
 		this.journeyHistory = new ArrayList<ContainerJourneyInfo>();
 		this.containerID = containerID;
 		this.accessClients = new HashSet<Client>();
+		this.validator = new Validator(company);
 		
 	}
 	
@@ -139,16 +140,6 @@ public class Container{
 	public void setContent(String content) {
 		this.content = content;
 	}
-	
-	/** Gets content of container
-	 * 
-	 * @return content
-	 */
-	public String getContent() {
-		return content;
-	}
-	
-	
 	
 	/**Gets containerID
 	 * 
@@ -271,11 +262,18 @@ public class Container{
 	public ResponseObject grantAccess (Client client) {
 //		Container
 		ResponseObject response = new ResponseObject();
-		
-		getAccessClients().add(client);
-		response.setErrorMessage("Access succesfully granted");
-		return response;
 
+		boolean sameCompany = client.getCompany().equals(getOwner().getCompany());
+		
+		if (sameCompany) {
+			getAccessClients().add(client);
+			response.setErrorMessage("Access succesfully granted");
+			return response;
+		}
+		
+		response.setErrorMessage("You do not share company");
+		
+		return response;
 	}
 	
 	/**Accesses status of container
@@ -319,7 +317,7 @@ public class Container{
 	public ResponseObject getHistoryOfContainerForClient (Client client) {
 		ResponseObject response = new ResponseObject();
 		
-		boolean clientHasAccess = Validator.clientHasAccess(client, this);
+		boolean clientHasAccess = validator.clientHasAccess(client, this);
 		
 		if (clientHasAccess) {
 			ArrayList<Journey> journeyHist = fetchContainerHistory(client);
