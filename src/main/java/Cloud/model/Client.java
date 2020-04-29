@@ -12,6 +12,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import Cloud.model.Client;
 import Cloud.model.Container;
 import Cloud.model.Journey;
@@ -20,41 +22,31 @@ import Cloud.model.ResponseObject;
 import Cloud.model.Validator;
 
 
+
 /**Represents a client entity
  * @Author: Victor
  * @Author Gustav
  */
 // New version
-@Entity
 public class Client {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO) 
-	@Column
+
 	private int clientID;
-	@NotBlank
-	@Column
+
 	private String name;
-	@NotBlank
-	@Column
+
 	private String email;
-	@NotBlank
-	@Column
+
 	private String birthdate;
-	@NotBlank
-	@Column
+
 	private String gender;
-	@NotBlank
-	@Column
+
 	private int number;
-    //Only works when transient annotation
-	//Should work from JPA point of view
-	@ManyToOne
-	private LogisticCompany company;
-	@NotBlank
-	@Column
+
+
 	private String password;
-	@Transient
-	private Validator validator; 
+
+
+
 	
 	
 	
@@ -93,22 +85,8 @@ public class Client {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	/** Gets clients logistic company
-	 * 
-	 * @return LogisticCompany
-	 */
-	public LogisticCompany getCompany() {
-		return company;
-	}
-	/**Sets clients logistic company, and instantiates a validator object 
-	 * 
-	 * @param company
-	 */
 
-	public void setCompany(LogisticCompany company) {
-		this.company = company;
-		this.validator = new Validator(company);
-	}
+
 	
 	/**Gets clients name
 	 * 
@@ -200,7 +178,7 @@ public class Client {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof Client) {
-			return (this.getEmail()).equals(((Client) o).getEmail());
+			return (this.getClientID() == ((Client) o).getClientID());
 		}
 		return false;
 	}
@@ -225,9 +203,9 @@ public class Client {
 	public ResponseObject updateClient(String email) {
 		ResponseObject response = new ResponseObject();
 		// Valid new email
-		response = validator.validInput(getName(),email,getBirthdate(),getGender(),getNumber());
+		response = Validator.validInput(getName(),email,getBirthdate(),getGender(),getNumber());
 		// Check if new email belongs to a client already
-		if (response.getErrorMessage().equals("Non-existing client")) {
+		if (response.getErrorMessage().equals("Valid")) {
 			this.setEmail(email);
 			response.setErrorMessage("Email has been updated");
 			}
@@ -243,10 +221,10 @@ public class Client {
 	public ResponseObject updateClient(int number) {
 		ResponseObject response = new ResponseObject();
 		// Valid new phone number
-		boolean validNumber = validator.validPhoneNumber(number);
+		boolean validNumber = Validator.validPhoneNumber(number);
 		if (validNumber) {
 			this.setNumber(number);
-			response.setErrorMessage("Phone number has been updated");
+			response.setErrorMessage("Valid Phone number");
 			}
 		else {
 			response.setErrorMessage(number + " is not a valid phone number");

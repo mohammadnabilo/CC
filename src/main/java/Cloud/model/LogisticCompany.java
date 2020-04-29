@@ -10,32 +10,36 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+
+
 
 /** This class represents a logistic company.
  * 
  * @author Gustav Als
  * @author Victor Brevig
+ * 
  */
-@Entity
+
 public class LogisticCompany {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO) 
-	@Column
+
 	private int companyID;
-	@NotBlank
-	@Column
 	private String name;
-	@Transient
-	private ClientDatabase clients; //Should be list of object
-	@Transient
+
+	private String password;
+	
+	private ClientDatabase clients;
+
 	private ContainerDatabase containers;
-	@Transient
+
+	
 	private JourneyDatabase journeys;
-	@NotBlank
-	@Column
+
 	private int amountOfContainers;
-	@Transient
-	private Validator validator;
+
 	
 	
 	
@@ -45,15 +49,15 @@ public class LogisticCompany {
 	 * @param companyID
 	 * @param amountOfContainers
 	 */
-	public LogisticCompany(String name, int companyID, int amountOfContainers) {
+	public LogisticCompany(String name, int companyID, int amountOfContainers, String password) {
 		super();
 		this.name = name;
 		this.companyID = companyID;
 		this.clients = new ClientDatabase();
 		this.journeys = new JourneyDatabase();
 		this.amountOfContainers = amountOfContainers;
-		this.validator = new Validator(this);
 		this.containers = new ContainerDatabase();
+		this.password = password;
 		
 		// Generate existing containers
 		generateExistingContainers(amountOfContainers);
@@ -66,9 +70,52 @@ public class LogisticCompany {
 	 */
 	private void generateExistingContainers(int amountOfContainers) {
 		for (int i=1; i<=amountOfContainers;i++) {
-			containers.add(new Container(i,this));
+			containers.add(new Container(i));
 		}
 	}
+	
+	/** Gets container database
+	 * 
+	 * @return containers
+	 */
+	
+	public ContainerDatabase getContainers() {
+		return containers;
+	}
+	/**Sets container database
+	 * 
+	 * @param containers
+	 */
+
+	public void setContainers(ContainerDatabase containers) {
+		this.containers = containers;
+	}
+	/**Gets journey database
+	 * 
+	 * @return journeys
+	 */
+
+	public JourneyDatabase getJourneys() {
+		return journeys;
+	}
+	/**Sets journey database
+	 * 
+	 * @param journeys
+	 */
+
+	public void setJourneys(JourneyDatabase journeys) {
+		this.journeys = journeys;
+	}
+	/**Sets client database
+	 * 
+	 * @param clients
+	 */
+
+
+	public void setClients(ClientDatabase clients) {
+		this.clients = clients;
+	}
+	
 
 	/** This method retrieves the ID of the company.
 	 * 
@@ -78,14 +125,6 @@ public class LogisticCompany {
 		return companyID;
 	}
 	
-	/** This method retrieves a set of containers on a specific journey.
-	 * 
-	 * @param journey
-	 * @return A set of containers
-	 */
-	public Set<Container> getContainersForJourney(Journey journey){
-		return containers.filterJourney(journey);
-	}
 	
 	/** This method fetches the client database of the company
 	 * 
@@ -117,7 +156,7 @@ public class LogisticCompany {
 	 */
 	public void registerJourney(Journey journey) {
 		journey.setJourneyID(journeys.size() + 1);
-		journey.setCompany(this);
+		journey.setContainerDB(containers);
 		journeys.add(journey);
 		
 	}
@@ -162,11 +201,10 @@ public class LogisticCompany {
 	 */
 	public ResponseObject newClient(Client client) {
 		ResponseObject response = null;
-		response = validator.validInput(client.getName(),client.getEmail(),client.getBirthdate(),client.getGender(),client.getNumber());
-		if (response.getErrorMessage().equals("Non-existing client")) {
+		response = Validator.validInput(client.getName(),client.getEmail(),client.getBirthdate(),client.getGender(),client.getNumber());
+		if (response.getErrorMessage().equals("Valid")) {
 			// Set id
 			client.setClientID(clients.size() + 1);
-			client.setCompany(this);
 			clients.add(client);
 			response.setErrorMessage("Client was successfully added");
 		}
@@ -236,6 +274,12 @@ public class LogisticCompany {
 		return clients.stream().anyMatch(c -> c.getEmail().equals(email));
 	}
 	
+	public String getPassword() {
+		return password;
+	}
+	public String getName() {
+		return name;
+	}
 	
 	
 	

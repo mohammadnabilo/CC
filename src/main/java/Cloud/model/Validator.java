@@ -4,9 +4,15 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.validator.GenericValidator;
+import org.codehaus.jackson.annotate.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 public class Validator {
 
+<<<<<<< HEAD
 	private LogisticCompany company;
 	
 	
@@ -22,6 +28,8 @@ public class Validator {
 	public void setCompany(LogisticCompany company) {
 		this.company = company;
 	}
+=======
+>>>>>>> redirectRefactor
 
 	public static boolean validBirthdate(String birthdate) {
 		return GenericValidator.isDate(birthdate, "dd-MM-yyyy", true);
@@ -47,12 +55,35 @@ public class Validator {
 				|| (number==0)   );
 	}
 	
+<<<<<<< HEAD
 	
 	public boolean validNumber(int number) {
 		int length = String.valueOf(number).length();
 		return (length == 8);
 	}
 	public ResponseObject validInput(String name, String email, String birthdate, String gender, int number) {
+=======
+	/** Method to check if a phone number is valid
+	 * 
+	 * @param number
+	 * @return boolean
+	 */
+	public static boolean validPhoneNumber(int number) {
+		int length = String.valueOf(number).length();
+		return (length == 8);
+	}
+	
+	/** Checks if new client info is valid 
+	 * 
+	 * @param name
+	 * @param email
+	 * @param birthdate
+	 * @param gender
+	 * @param number
+	 * @return response - type ResponseObject
+	 */
+	public static ResponseObject validInput(String name, String email, String birthdate, String gender, int number) {
+>>>>>>> redirectRefactor
 	ResponseObject response = new ResponseObject();
 	
 		if (!emptyParameters(name,email,birthdate,gender,number)) {
@@ -72,17 +103,23 @@ public class Validator {
 			return response;
 		}
 		
-		
-		if (!company.clientExists(email)) {
-			response = new ResponseObject("Non-existing client");
-		}
-		else {
-			response = new ResponseObject("Existing client");
-		}
+		response.setErrorMessage("Valid");
 		return response;
 	
+<<<<<<< HEAD
 }
 	public boolean clientHasAccess(Client client, Container container) {
+=======
+	}
+	
+	/** Checks if a client has access to a given container
+	 * 
+	 * @param client
+	 * @param container
+	 * @return boolean
+	 */
+	public static boolean clientHasAccess(Client client, Container container) {
+>>>>>>> redirectRefactor
 		return container.getAccessClients().stream().anyMatch(c -> c.equals(client));
 	}
 	

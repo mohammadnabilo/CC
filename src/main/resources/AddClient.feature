@@ -9,6 +9,7 @@ Feature: Adding a client to register
     When Informations is entered
     Then display success message
  
+<<<<<<< HEAD
  
   Scenario: Client already exists
     Given A logistic company
@@ -16,6 +17,9 @@ Feature: Adding a client to register
     When repeated information is entered
     Then error message is thrown
  
+=======
+
+>>>>>>> redirectRefactor
    Scenario: Missing parameter
     Given A logistic company
     Given A none existing client with missing information
