@@ -1,4 +1,4 @@
-package CloudContainers;
+package Cloud.model;
 
 public class statusTrackingObject {
 	private double time;
